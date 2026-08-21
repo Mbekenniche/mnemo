@@ -1,0 +1,72 @@
+# ==========================================
+# Python & uv environments
+# ==========================================
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+
+
+
+# ==========================================
+# Secrets & Environment variables
+# ==========================================
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+
+# ==========================================
+# Memory, Local Docs & Vector Stores
+# ==========================================
+# Storage directories for indexed local documents
+/data/
+corpus/
+/documents/
+
+
+# Local databases (SQLite, ChromaDB, LanceDB, FAISS, etc.)
+*.sqlite3
+*.db
+/chroma/
+/vector_store/
+/storage/
+
+
+# ==========================================
+# Audio & Voice Pipeline (v2: STT / TTS)
+# ==========================================
+# Temporary mic recordings, audio buffers and caches
+*.ogg
+*.flac
+/recordings/
+/audio_cache/
+/tmp/
+
+
+# ==========================================
+# Local Weights & Models (Whisper, Piper, etc.)
+# ==========================================
+/models/
+*.onnx
+*.pt
+*.safetensors
+coverage.xml
+.coverage
+htmlcov/
+
+# ==========================================
+# IDEs & Operating Systems
+# ==========================================
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
