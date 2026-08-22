@@ -7,7 +7,9 @@ authors = [
     { name = "Mohamed Bekenniche", email = "mbekenniche@gmail.com" }
 ]
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "numpy>=2.5.2",
+]
 
 [project.scripts]
 mnemo = "mnemo:main"
@@ -27,3 +29,5 @@ dev = [
 python_version = "3.12"
 strict = true
 files = ["src", "tests"]
+[tool.coverage.report]
+show_missing = true
