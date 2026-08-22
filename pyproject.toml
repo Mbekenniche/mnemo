@@ -23,3 +23,7 @@ dev = [
     "pytest-cov>=7.1.0",
     "ruff>=0.16.4",
 ]
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src", "tests"]
