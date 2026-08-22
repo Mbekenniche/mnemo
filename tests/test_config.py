@@ -34,7 +34,7 @@ def test_config_is_frozen(valid_config_kwargs: ConfigDict) -> None:
 def test_config_enforces_kw_only() -> None:
     # Ensure positional arguments are rejected (kw_only=True)
     with pytest.raises(TypeError):
-        Config("gpt-4o", 0.7, Path("/tmp/corpus"), 30.0)  # type: ignore[misc]
+        Config("gpt-4o", 0.7, Path("/tmp/corpus"), 30.0)  # type: ignore[call-arg]
 
 
 
