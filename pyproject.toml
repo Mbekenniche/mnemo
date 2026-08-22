@@ -7,7 +7,9 @@ authors = [
     { name = "Mohamed Bekenniche", email = "mbekenniche@gmail.com" }
 ]
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "numpy>=2.5.2",
+]
 
 [project.scripts]
 mnemo = "mnemo:main"
@@ -27,3 +29,12 @@ dev = [
 python_version = "3.12"
 strict = true
 files = ["src", "tests"]
+[tool.pytest.ini_options]
+addopts = "--cov --cov-report=term-missing --cov-report=html"
+
+[tool.coverage.run]
+source = ["src"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 90

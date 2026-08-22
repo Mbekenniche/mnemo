@@ -6,4 +6,4 @@ class Config:
     model: str
     temperature: float
     corpus_dir: Path
-    timeout_secondes: float
+    timeout_seconds: float
