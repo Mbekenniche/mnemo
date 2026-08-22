@@ -29,5 +29,9 @@ dev = [
 python_version = "3.12"
 strict = true
 files = ["src", "tests"]
+[tool.coverage.run]
+source = ["src"]
+
 [tool.coverage.report]
 show_missing = true
+fail_under = 90
