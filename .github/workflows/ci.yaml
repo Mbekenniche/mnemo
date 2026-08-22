@@ -23,5 +23,5 @@ jobs:
       - name: Run tests
         run: uv run pytest
       - name: Run mypy
-        run: mypy --strict
+        run: uv run mypy --strict
 
