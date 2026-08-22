@@ -1,0 +1,25 @@
+[project]
+name = "mnemo"
+version = "0.1.0"
+description = "A fast, local-first personal assistant with contextual memory and voice interface."
+readme = "README.md"
+authors = [
+    { name = "Mohamed Bekenniche", email = "mbekenniche@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+mnemo = "mnemo:main"
+
+[build-system]
+requires = ["uv_build>=0.12.2,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "mypy>=2.3.1",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.16.4",
+]
