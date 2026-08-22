@@ -29,6 +29,9 @@ dev = [
 python_version = "3.12"
 strict = true
 files = ["src", "tests"]
+[tool.pytest.ini_options]
+addopts = "--cov --cov-report=term-missing --cov-report=html"
+
 [tool.coverage.run]
 source = ["src"]
 
