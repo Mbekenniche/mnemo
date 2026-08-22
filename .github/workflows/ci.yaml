@@ -10,8 +10,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-  steps:
-    - name: Checkout du code
-      uses: actions/checkout@v4
-    - name: List directory
-      run: ls -a
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+      - name: List directory
+        run: ls -a
