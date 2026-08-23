@@ -41,6 +41,8 @@ and pins every dependency to the versions recorded in `uv.lock`.
 
 ---
 
+---
+
 ## Configuration
 
 Mnemo reads its configuration from a TOML file, with environment variables
@@ -54,21 +56,29 @@ cp .env.example .env
 
 | TOML key | Environment variable | Type | Constraint |
 |---|---|---|---|
-| `model` | `MNEMO_MODEL` | string | — |
+| `model` | `MNEMO_MODEL` | string | must be a string, not a coerced number |
 | `temperature` | `MNEMO_TEMPERATURE` | float | between 0.0 and 1.5 |
-| `corpus_dir` | `MNEMO_CORPUS_DIR` | path | not checked for existence |
-| `timeout_seconds` | `MNEMO_TIMEOUT_SECONDS` | float | strictly positive |
+| `corpus_dir` | `MNEMO_CORPUS_DIR` | path | must not be empty; existence is not checked |
+| `timeout_seconds` | `MNEMO_TIMEOUT_SECONDS` | duration | strictly positive |
 | `api_key` | `MNEMO_API_KEY` | string | never printed or logged |
 
 All settings are required. There are no defaults: a missing key is an error,
+not a silent fallback.
 
-### Precedence
+### Durations
 
-Environment variables override TOML values, so that deployment settings can be
-changed without editing files. An environment variable set to an empty string is
-treated as unset and falls back to the TOML value.
+`timeout_seconds` accepts either a plain number of seconds or a string with a
+unit suffix — `s`, `m` or `h`:
 
-Unknown keys in the TOML file are rejected, so that a typo fails.
+```toml
+timeout_seconds = 30       # 30 seconds
+timeout_seconds = "30s"    # 30 seconds
+timeout_seconds = "5m"     # 300 seconds
+timeout_seconds = "1.5h"   # 5400 seconds
+```
+
+Numeric strings without a suffix are also accepted and read as seconds
+(`"45"` is 45 seconds). The unit is case-sensitive and must directly follow
 
 ---
 
