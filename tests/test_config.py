@@ -30,7 +30,7 @@ def test_config_is_frozen(valid_config_kwargs: ConfigDict) -> None:
     # Ensure mutation is blocked (frozen=True)
     config = Config(**valid_config_kwargs)
     with pytest.raises((FrozenInstanceError, AttributeError)):
-        object.__setattr__(config, "temperature", 0.5)
+        config.temperature = 0.5  # type: ignore[misc]
 
 
 def test_config_enforces_kw_only() -> None:
