@@ -41,6 +41,37 @@ and pins every dependency to the versions recorded in `uv.lock`.
 
 ---
 
+## Configuration
+
+Mnemo reads its configuration from a TOML file, with environment variables
+taking precedence over file values. Copy the example file to get started:
+
+```bash
+cp .env.example .env
+```
+
+### Settings
+
+| TOML key | Environment variable | Type | Constraint |
+|---|---|---|---|
+| `model` | `MNEMO_MODEL` | string | — |
+| `temperature` | `MNEMO_TEMPERATURE` | float | between 0.0 and 1.5 |
+| `corpus_dir` | `MNEMO_CORPUS_DIR` | path | not checked for existence |
+| `timeout_seconds` | `MNEMO_TIMEOUT_SECONDS` | float | strictly positive |
+| `api_key` | `MNEMO_API_KEY` | string | never printed or logged |
+
+All settings are required. There are no defaults: a missing key is an error,
+
+### Precedence
+
+Environment variables override TOML values, so that deployment settings can be
+changed without editing files. An environment variable set to an empty string is
+treated as unset and falls back to the TOML value.
+
+Unknown keys in the TOML file are rejected, so that a typo fails.
+
+---
+
 ## Development
 
 Install the git hooks once per clone. They are stored in `.git/hooks/` and are

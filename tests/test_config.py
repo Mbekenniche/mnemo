@@ -12,6 +12,7 @@ class ConfigDict(TypedDict):
     temperature: float
     corpus_dir: Path
     timeout_seconds: float
+    api_key: str
 
 
 @pytest.fixture
@@ -21,6 +22,7 @@ def valid_config_kwargs() -> ConfigDict:
         "temperature": 0.7,
         "corpus_dir": Path("/tmp/corpus"),
         "timeout_seconds": 30.0,
+        "api_key": "sk-secret-from-toml",
     }
 
 
@@ -34,4 +36,4 @@ def test_config_is_frozen(valid_config_kwargs: ConfigDict) -> None:
 def test_config_enforces_kw_only() -> None:
     # Ensure positional arguments are rejected (kw_only=True)
     with pytest.raises(TypeError):
-        Config("gpt-4o", 0.7, Path("/tmp/corpus"), 30.0)  # type: ignore[call-arg]
+        Config("gpt-4o", 0.7, Path("/tmp/corpus"), 30.0, "sk-secret-from-toml")  # type: ignore[call-arg]
