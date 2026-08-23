@@ -1,4 +1,6 @@
+import math
 import os
+import re
 import tomllib
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -17,6 +19,57 @@ class Config:
     corpus_dir: Path
     timeout_seconds: float
     api_key: str = field(repr=False)
+
+
+_DURATION_PATTERN = re.compile(r"^(\d+(?:\.\d+)?)([smh])$")
+_PLAIN_NUMBER_PATTERN = re.compile(r"^\d+(?:\.\d+)?$")
+
+_UNIT_MULTIPLIERS = {
+    "s": 1.0,
+    "m": 60.0,
+    "h": 3600.0,
+}
+
+
+def _strict_float(value: Any) -> float:
+    # Disallow bools which inherit from int in Python
+    if isinstance(value, bool):
+        raise TypeError("boolean is not a valid number")
+
+    if isinstance(value, (int, float)):
+        res = float(value)
+    elif isinstance(value, str):
+        val_str = value.strip()
+        if not _PLAIN_NUMBER_PATTERN.match(val_str):
+            raise ValueError(f"malformed numeric format '{value}'")
+        res = float(val_str)
+    else:
+        raise TypeError(f"expected number, got {type(value).__name__}")
+
+    if not math.isfinite(res):
+        raise ValueError(f"value must be finite, got {res}")
+
+    return res
+
+
+def _parse_duration(value: Any) -> float:
+    # Reject booleans explicitly
+    if isinstance(value, bool):
+        raise TypeError("boolean is not a valid duration")
+
+    # Match suffixed strings strictly: e.g., '30s', '5m', '2h'
+    if isinstance(value, str):
+        val_str = value.strip()
+        match = _DURATION_PATTERN.match(val_str)
+        if match:
+            amount_str, unit = match.groups()
+            amount = float(amount_str)
+            if not math.isfinite(amount):
+                raise ValueError(f"duration amount must be finite: '{value}'")
+            return amount * _UNIT_MULTIPLIERS[unit]
+
+    # Fall back to strict numeric parsing (int, float, or strictly formatted numeric str)
+    return _strict_float(value)
 
 
 T = TypeVar("T")
@@ -53,26 +106,27 @@ def load_config(toml_path: Path) -> Config:
                 f"Missing required key: '{key}' (or '{env_key}')."
             ) from None
 
-        # Strict type checking before casting to prevent silent coercions (e.g., str(123))
+        # Strict type checking before casting to prevent silent coercions
         if cast_type is str and not isinstance(val, str):
             raise ConfigError(
-                f"Key '{key}' must be a string, got {type(val).__name__}."
+                f"Invalid value for '{key}': expected string, got {type(val).__name__}."
             ) from None
         if cast_type is Path and val == "":
-            raise ConfigError(f"Key '{key}' cannot be an empty path.") from None
+            raise ConfigError(
+                f"Invalid value for '{key}': path cannot be empty."
+            ) from None
 
         try:
             return cast_type(val)
         except (ValueError, TypeError) as e:
-            raise ConfigError(
-                f"Cannot cast key '{key}' to {cast_type.__name__}."
-            ) from e
+            # Preserve the precise cause message from the parser
+            raise ConfigError(f"Invalid value for '{key}': {e}.") from e
 
     # 4. Extract and validate BEFORE constructing the object
     model = get_value("model", str)
-    temperature = get_value("temperature", float)
+    temperature = get_value("temperature", _strict_float)
     corpus_dir = get_value("corpus_dir", Path)
-    timeout_seconds = get_value("timeout_seconds", float)
+    timeout_seconds = get_value("timeout_seconds", _parse_duration)
     api_key = get_value("api_key", str)
 
     if not (0.0 <= temperature <= 1.5):
