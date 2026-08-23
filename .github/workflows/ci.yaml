@@ -37,12 +37,12 @@ jobs:
 
       - name: Run ruff check
         run: uv run ruff check
-        if: always()
+        if: '!cancelled()'
 
       - name: Run mypy
         run: uv run mypy
-        if: always()
+        if: '!cancelled()'
 
       - name: Run tests
         run: uv run pytest
-        if: always()
+        if: '!cancelled()'
