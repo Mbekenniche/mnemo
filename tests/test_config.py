@@ -1,8 +1,58 @@
+from dataclasses import FrozenInstanceError
 from pathlib import Path
+from typing import Any, TypedDict
 
 import pytest
 
-from mnemo.config import ConfigError, load_config
+from mnemo.config import Config, ConfigError, load_config
+
+
+class ConfigDict(TypedDict):
+    model: str
+    temperature: float
+    corpus_dir: Path
+    timeout_seconds: float
+    api_key: str
+
+
+@pytest.fixture
+def valid_config_kwargs() -> ConfigDict:
+    return {
+        "model": "gpt-4o",
+        "temperature": 0.7,
+        "corpus_dir": Path("/tmp/corpus"),
+        "timeout_seconds": 30.0,
+        "api_key": "sk-secret-from-toml",
+    }
+
+
+def test_config_is_frozen(valid_config_kwargs: ConfigDict) -> None:
+    # Ensure mutation is blocked (frozen=True)
+    config = Config(**valid_config_kwargs)
+    with pytest.raises((FrozenInstanceError, AttributeError)):
+        object.__setattr__(config, "temperature", 0.5)
+
+
+def test_config_enforces_kw_only() -> None:
+    # Ensure positional arguments are rejected (kw_only=True)
+    config_cls: Any = Config
+    with pytest.raises(TypeError):
+        config_cls("gpt-4o", 0.7, Path("/tmp/corpus"), 30.0, "sk-secret-from-toml")
+
+
+@pytest.fixture
+def minimal_toml(tmp_path: Path) -> Path:
+    config_file = tmp_path / "config.toml"
+    config_file.write_text(
+        """
+        model = "gpt-4o"
+        temperature = 0.7
+        corpus_dir = "/tmp/corpus"
+        timeout_seconds = 30.0
+        api_key = "secret"
+        """
+    )
+    return config_file
 
 
 def test_load_config_duration_numeric(tmp_path: Path) -> None:
@@ -131,19 +181,50 @@ def test_load_config_rejects_non_finite_temperature(
     assert "temperature" in str(exc_info.value)
 
 
-@pytest.fixture
-def minimal_toml(tmp_path: Path) -> Path:
+@pytest.mark.parametrize(
+    "literal_value", ["nan", "+nan", "-nan", "inf", "+inf", "-inf"]
+)
+def test_load_config_rejects_native_toml_non_finite_timeout(
+    tmp_path: Path, literal_value: str
+) -> None:
+    # Native unquoted TOML float literals (nan, inf) produce float objects and must be rejected
     config_file = tmp_path / "config.toml"
     config_file.write_text(
-        """
+        f"""
         model = "gpt-4o"
         temperature = 0.7
+        corpus_dir = "/tmp/corpus"
+        timeout_seconds = {literal_value}
+        api_key = "secret"
+        """
+    )
+    with pytest.raises(ConfigError) as exc_info:
+        load_config(config_file)
+    assert "timeout_seconds" in str(exc_info.value)
+    assert "must be finite" in str(exc_info.value)
+
+
+@pytest.mark.parametrize(
+    "literal_value", ["nan", "+nan", "-nan", "inf", "+inf", "-inf"]
+)
+def test_load_config_rejects_native_toml_non_finite_temperature(
+    tmp_path: Path, literal_value: str
+) -> None:
+    # Native unquoted TOML float literals for temperature must be rejected before boundary checks
+    config_file = tmp_path / "config.toml"
+    config_file.write_text(
+        f"""
+        model = "gpt-4o"
+        temperature = {literal_value}
         corpus_dir = "/tmp/corpus"
         timeout_seconds = 30.0
         api_key = "secret"
         """
     )
-    return config_file
+    with pytest.raises(ConfigError) as exc_info:
+        load_config(config_file)
+    assert "temperature" in str(exc_info.value)
+    assert "must be finite" in str(exc_info.value)
 
 
 @pytest.mark.parametrize(
